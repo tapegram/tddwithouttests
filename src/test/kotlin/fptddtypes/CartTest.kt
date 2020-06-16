@@ -78,7 +78,7 @@ class CartTest {
 
     @Test
     fun `cant checkout with payments less than total`() {
-        val item = Item.Unavailable(
+        val item = Item.Available(
             id = "item1",
             price = 2
         )
