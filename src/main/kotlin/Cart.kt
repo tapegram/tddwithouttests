@@ -5,8 +5,11 @@ class Cart(
     fun addItem(item: Item) {
         items.add(item)
     }
+
+    fun checkout(): Unit = TODO()
 }
 
 data class Item(
-    val id: String
+    val id: String,
+    val price: Int
 )
