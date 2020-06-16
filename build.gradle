@@ -10,6 +10,8 @@ repositories {
     jcenter()
 }
 
+apply plugin: 'kotlin-kapt'
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     testImplementation(
@@ -18,6 +20,10 @@ dependencies {
     )
     testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.2')
     testImplementation 'org.amshove.kluent:kluent:1.61'
+    def arrow_version = "0.10.4"
+    compile "io.arrow-kt:arrow-core:$arrow_version"
+    compile "io.arrow-kt:arrow-syntax:$arrow_version"
+    kapt    "io.arrow-kt:arrow-meta:$arrow_version"
 }
 
 test {
