@@ -24,23 +24,32 @@ sealed class Cart {
 
 data class Item(
     val id: String,
-    val price: Int
+    val price: Int,
+    val isAvailable: Boolean = true
 )
 
 data class Payment(
     val amount: Int
 )
 
-fun addItem(cart: Cart.Empty, item: Item) =
-    Cart.ReadyForCheckout(
+fun addItem(cart: Cart.Empty, item: Item): Cart.ReadyForCheckout {
+    if (!item.isAvailable) {
+        throw RuntimeException("cant add unavailable item")
+    }
+    return Cart.ReadyForCheckout(
         id = cart.id,
         items = NonEmptyList(item)
     )
+}
 
-fun addItem(cart: Cart.ReadyForCheckout, item: Item) =
-    cart.copy(
+fun addItem(cart: Cart.ReadyForCheckout, item: Item): Cart.ReadyForCheckout {
+    if (!item.isAvailable) {
+        throw RuntimeException("cant add unavailable item")
+    }
+    return cart.copy(
         items = cart.items + item
     )
+}
 
 sealed class CheckoutExceptions {
     object NotEnoughMoney: CheckoutExceptions()

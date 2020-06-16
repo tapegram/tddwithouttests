@@ -3,7 +3,9 @@ package fptddtypes
 import arrow.core.Invalid
 import arrow.core.NonEmptyList
 import arrow.core.Valid
+import org.amshove.kluent.invoking
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Test
 
 class CartTest {
@@ -42,6 +44,38 @@ class CartTest {
                 item1,
                 item2
             )
+    }
+
+    @Test
+    fun `can not add an unavailable item to an empty cart`() {
+        val cart = Cart.Empty(id = "123")
+        val item = Item(
+            id = "item1",
+            price = 1,
+            isAvailable = false
+        )
+        invoking {
+            addItem(cart, item)
+        } shouldThrow RuntimeException::class
+    }
+
+    @Test
+    fun `can not add an unavailable item to a ready for checkout cart`() {
+        val cart = Cart.Empty(id = "123")
+        val item1 = Item(
+            id = "item1",
+            price = 1
+        )
+        val item2 = Item(
+            id = "item2",
+            price = 1,
+            isAvailable = false
+        )
+        invoking {
+            addItem(Cart.Empty(id = "123"), item1)
+                .let { cart -> addItem(cart, item2) }
+        } shouldThrow RuntimeException::class
+
     }
 
     @Test
