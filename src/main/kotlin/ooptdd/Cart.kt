@@ -6,6 +6,9 @@ class Cart(
     var isClosed: Boolean = false
 ) {
     fun addItem(item: Item) {
+        if (!item.isAvailable) {
+            throw RuntimeException("cant add unavailable item")
+        }
         items.add(item)
     }
 
@@ -30,7 +33,8 @@ class Cart(
 
 data class Item(
     val id: String,
-    val price: Int
+    val price: Int,
+    val isAvailable: Boolean = true
 )
 
 data class Payment(

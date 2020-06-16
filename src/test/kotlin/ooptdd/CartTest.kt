@@ -54,6 +54,20 @@ class CartTest {
     }
 
     @Test
+    fun `can not add an unavailable item to the cart`() {
+        val cart = Cart(id = "123")
+        val item = Item(
+            id = "item1",
+            price = 1,
+            isAvailable = false
+        )
+        invoking {
+            cart.addItem(item)
+        } shouldThrow RuntimeException::class
+
+    }
+
+    @Test
     fun `cant checkout with empty cart`() {
         invoking {
             Cart(id = "123").checkout(emptyList())
