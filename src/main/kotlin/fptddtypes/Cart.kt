@@ -12,40 +12,40 @@ sealed class Cart {
 
     data class ReadyForCheckout(
         val id: String,
-        val items: NonEmptyList<Item>
+        val items: NonEmptyList<Item.Available>
     ): Cart()
 
     data class Closed(
         val id: String,
-        val items: NonEmptyList<Item>
+        val items: NonEmptyList<Item.Available>
     ): Cart()
 
 }
 
-data class Item(
-    val id: String,
-    val price: Int,
-    val isAvailable: Boolean = true
-)
+sealed class Item {
+    data class Available(
+        val id: String,
+        val price: Int
+    ): Item()
+
+    data class Unavailable(
+        val id: String,
+        val price: Int
+    ): Item()
+}
 
 data class Payment(
     val amount: Int
 )
 
-fun addItem(cart: Cart.Empty, item: Item): Cart.ReadyForCheckout {
-    if (!item.isAvailable) {
-        throw RuntimeException("cant add unavailable item")
-    }
+fun addItem(cart: Cart.Empty, item: Item.Available): Cart.ReadyForCheckout {
     return Cart.ReadyForCheckout(
         id = cart.id,
         items = NonEmptyList(item)
     )
 }
 
-fun addItem(cart: Cart.ReadyForCheckout, item: Item): Cart.ReadyForCheckout {
-    if (!item.isAvailable) {
-        throw RuntimeException("cant add unavailable item")
-    }
+fun addItem(cart: Cart.ReadyForCheckout, item: Item.Available): Cart.ReadyForCheckout {
     return cart.copy(
         items = cart.items + item
     )
