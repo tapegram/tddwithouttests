@@ -1,8 +1,5 @@
 package fptddtypes
 
-import ooptdd.Cart
-import ooptdd.Item
-import ooptdd.Payment
 import org.amshove.kluent.invoking
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldThrow
@@ -24,16 +21,12 @@ class CartTest {
             id = "item1",
             price = 1
         )
-        cart.addItem(item)
-
-        assert(
-            cart.items == listOf(item)
-        )
+        addItem(cart, item)
+            .items shouldBeEqualTo listOf(item)
     }
 
     @Test
     fun `can add multiple items to the cart`() {
-        val cart = Cart(id = "123")
         val item1 = Item(
             id = "item1",
             price = 1
@@ -42,78 +35,103 @@ class CartTest {
             id = "item2",
             price = 1
         )
-        cart.addItem(item1)
-        cart.addItem(item2)
-
-        assert(
-            cart.items == listOf(
+        addItem(Cart(id = "123"), item1)
+            .let { cart -> addItem(cart, item2) }
+            .items shouldBeEqualTo listOf(
                 item1,
                 item2
             )
-        )
     }
 
     @Test
     fun `cant checkout with empty cart`() {
         invoking {
-            Cart(id = "123").checkout(emptyList())
+            checkout(
+                cart = Cart(id = "123"),
+                payments = emptyList()
+            )
         } shouldThrow RuntimeException::class
     }
 
     @Test
     fun `cant checkout with payments less than total`() {
-        val cart = Cart(id = "123")
         val item = Item(
             id = "item1",
             price = 2
         )
-        cart.addItem(item)
 
         invoking {
-            cart.checkout(payments=listOf(Payment(amount = 1)))
+            checkout(
+                cart = Cart(id = "123")
+                    .let { addItem(it, item) }
+                ,
+                payments = listOf(
+                    Payment(amount = 1)
+                )
+            )
         } shouldThrow RuntimeException::class
     }
 
     @Test
     fun `cant checkout with payments more than total`() {
-        val cart = Cart(id = "123")
         val item = Item(
             id = "item1",
             price = 2
         )
-        cart.addItem(item)
 
         invoking {
-            cart.checkout(payments=listOf(Payment(amount = 3)))
+            checkout(
+                cart = Cart(id = "123")
+                    .let { addItem(it, item) }
+                ,
+                payments = listOf(
+                    Payment(amount = 3)
+                )
+            )
         } shouldThrow RuntimeException::class
     }
 
     @Test
     fun `can checkout when payment matches cart total`() {
-        val cart = Cart(id = "123")
         val item = Item(
             id = "item1",
             price = 2
         )
-        cart.addItem(item)
 
-        val result = cart.checkout(payments=listOf(Payment(amount = 2)))
-        result shouldBeEqualTo true
+        val result = checkout(
+            cart = Cart(id = "123")
+                .let { addItem(it, item) }
+            ,
+            payments = listOf(
+                Payment(amount = 2)
+            )
+        )
+        result.isClosed shouldBeEqualTo true
     }
 
     @Test
     fun `checkout is idempotent`() {
-        val cart = Cart(id = "123")
         val item = Item(
             id = "item1",
             price = 2
         )
-        cart.addItem(item)
 
-        cart.checkout(payments=listOf(Payment(amount = 2)))
+        val result = checkout(
+            cart = Cart(id = "123")
+                .let { addItem(it, item) }
+            ,
+            payments = listOf(
+                Payment(amount = 2)
+            )
+        )
 
         invoking {
-            cart.checkout(payments=listOf(Payment(amount = 2)))
+            checkout(
+                cart = result,
+                payments = listOf(
+                    Payment(amount = 2)
+                )
+            )
         } shouldThrow RuntimeException::class
     }
 }
