@@ -1,12 +1,16 @@
 class Cart(
     val id: String,
-    val items: MutableList<Item> = mutableListOf()
+    val items: MutableList<Item> = mutableListOf(),
+    var isClosed: Boolean = false
 ) {
     fun addItem(item: Item) {
         items.add(item)
     }
 
     fun checkout(payments: List<Payment>): Boolean {
+        if (isClosed) {
+            throw RuntimeException("cant checkout twice friend")
+        }
         if (items.isEmpty()) {
             throw RuntimeException("cant checkout with empty cart!")
         }
@@ -17,6 +21,7 @@ class Cart(
             throw RuntimeException("too much money!!!")
         }
 
+        isClosed = true
         return true
     }
 }

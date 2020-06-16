@@ -96,4 +96,20 @@ class CartTest {
         val result = cart.checkout(payments=listOf(Payment(amount = 2)))
         result shouldBeEqualTo true
     }
+
+    @Test
+    fun `checkout is idempotent`() {
+        val cart = Cart(id="123")
+        val item = Item(
+            id = "item1",
+            price = 2
+        )
+        cart.addItem(item)
+
+        cart.checkout(payments=listOf(Payment(amount = 2)))
+
+        invoking {
+            cart.checkout(payments=listOf(Payment(amount = 2)))
+        } shouldThrow RuntimeException::class
+    }
 }
