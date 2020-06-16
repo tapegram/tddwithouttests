@@ -7,6 +7,7 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -16,6 +17,7 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-api:5.4.2'
     )
     testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.2')
+    testImplementation 'org.amshove.kluent:kluent:1.61'
 }
 
 test {
