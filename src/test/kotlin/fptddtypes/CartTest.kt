@@ -1,9 +1,9 @@
 package fptddtypes
 
+import arrow.core.Invalid
 import arrow.core.NonEmptyList
-import org.amshove.kluent.invoking
+import arrow.core.Valid
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Test
 
 class CartTest {
@@ -44,16 +44,6 @@ class CartTest {
             )
     }
 
-//    @Test
-//    fun `cant checkout with empty cart`() {
-//        invoking {
-//            checkout(
-//                cart = Cart.Empty(id = "123"),
-//                payments = emptyList()
-//            )
-//        } shouldThrow RuntimeException::class
-//    }
-
     @Test
     fun `cant checkout with payments less than total`() {
         val item = Item(
@@ -61,16 +51,14 @@ class CartTest {
             price = 2
         )
 
-        invoking {
-            checkout(
-                cart = Cart.Empty(id = "123")
-                    .let { addItem(it, item) }
-                ,
-                payments = listOf(
-                    Payment(amount = 1)
-                )
+        checkout(
+            cart = Cart.Empty(id = "123")
+                .let { addItem(it, item) }
+            ,
+            payments = listOf(
+                Payment(amount = 1)
             )
-        } shouldThrow RuntimeException::class
+        ) shouldBeEqualTo Invalid(NonEmptyList(CheckoutExceptions.NotEnoughMoney))
     }
 
     @Test
@@ -80,16 +68,14 @@ class CartTest {
             price = 2
         )
 
-        invoking {
-            checkout(
-                cart = Cart.Empty(id = "123")
-                    .let { addItem(it, item) }
-                ,
-                payments = listOf(
-                    Payment(amount = 3)
-                )
+        checkout(
+            cart = Cart.Empty(id = "123")
+                .let { addItem(it, item) }
+            ,
+            payments = listOf(
+                Payment(amount = 3)
             )
-        } shouldThrow RuntimeException::class
+        ) shouldBeEqualTo Invalid(NonEmptyList(CheckoutExceptions.TooMuchMoney))
     }
 
     @Test
@@ -107,35 +93,11 @@ class CartTest {
                 Payment(amount = 2)
             )
         )
-        result shouldBeEqualTo Cart.Closed(
-            id = result.id,
-            items = NonEmptyList(item)
+        result shouldBeEqualTo Valid(
+            Cart.Closed(
+                id = "123",
+                items = NonEmptyList(item)
+            )
         )
     }
-
-//    @Test
-//    fun `checkout is idempotent`() {
-//        val item = Item(
-//            id = "item1",
-//            price = 2
-//        )
-//
-//        val result = checkout(
-//            cart = Cart.Empty(id = "123")
-//                .let { addItem(it, item) }
-//            ,
-//            payments = listOf(
-//                Payment(amount = 2)
-//            )
-//        )
-//
-//        invoking {
-//            checkout(
-//                cart = result,
-//                payments = listOf(
-//                    Payment(amount = 2)
-//                )
-//            )
-//        } shouldThrow RuntimeException::class
-//    }
 }

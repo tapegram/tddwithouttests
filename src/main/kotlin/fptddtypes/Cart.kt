@@ -1,6 +1,9 @@
 package fptddtypes
 
+import arrow.core.Invalid
 import arrow.core.NonEmptyList
+import arrow.core.Valid
+import arrow.core.ValidatedNel
 
 sealed class Cart {
     data class Empty(
@@ -39,22 +42,24 @@ fun addItem(cart: Cart.ReadyForCheckout, item: Item) =
         items = cart.items + item
     )
 
-fun checkout(cart: Cart.ReadyForCheckout, payments: List<Payment>): Cart.Closed {
-//    if (cart.isClosed) {
-//        throw RuntimeException("cant checkout twice friend")
-//    }
-//    if (cart.items.isEmpty()) {
-//        throw RuntimeException("cant checkout with empty cart!")
-//    }
+sealed class CheckoutExceptions {
+    object NotEnoughMoney: CheckoutExceptions()
+    object TooMuchMoney: CheckoutExceptions()
+}
+
+fun checkout(cart: Cart.ReadyForCheckout, payments: List<Payment>):
+        ValidatedNel<CheckoutExceptions, Cart.Closed> {
     if (payments.sumBy { it.amount } < cart.items.toList().sumBy { it.price }) {
-        throw RuntimeException("not enough money!!!")
+        return Invalid(NonEmptyList(CheckoutExceptions.NotEnoughMoney))
     }
     if (payments.sumBy { it.amount } > cart.items.toList().sumBy{ it.price }) {
-        throw RuntimeException("too much money!!!")
+        return Invalid(NonEmptyList(CheckoutExceptions.TooMuchMoney))
     }
 
-    return Cart.Closed(
-        id = cart.id,
-        items = cart.items
+    return Valid(
+        Cart.Closed(
+            id = cart.id,
+            items = cart.items
+        )
     )
 }
